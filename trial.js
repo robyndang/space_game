@@ -2,33 +2,42 @@ var canvas = document.getElementById("myCanvas");
 var ctx;
 var w = 1000;
 var h = 600;
-var allStars = [];
-var o1 = {
+var allStars = createData(4);
+var allShips = createData(6);
+var o1 = {// player1 & spaceship & star
   "x": 200,
   "y": h/2,
   "d": 0,
   "angle": 0,
-  "changle": 15
+  "changle": 15,
+
+
+  "spikes": 5,
+  "outerRadius": 30,
+  "innerRadius": 12,
 }
 
 var o2 = {
-  "dx": randn(2),
-  "dy": 0.5+rand(2),
+  "x": 200,
+  "y":h/3,
+  "d": 2,
+  "dx": 30,
+  "dy": 30,
   "c": 200+rand(60),
   "a": 0.5,
+  "angle": 0,
+  "changle": 15,
   "spikes": 5,
-  "outerRadius": 25,
-  "innerRadius": 12
+  "outerRadius": 30,
+  "innerRadius": 12,
 }
 
 document.onkeydown = movePlayer;
 
 setUpCanvas();
-createData(4); // make __ stars
 animationLoop();
 
 
-// LEVEL 1: SPACE
 function animationLoop(){
   clear();
   circle(150, 110, 70);
@@ -40,7 +49,9 @@ function animationLoop(){
   player1(o1);
   forward(o1);
   bounce(o1);
+  // starsDrawUpdate(allStars);
   starsDrawUpdate(allStars);
+  // spaceshipDrawUpdate(allShips);
   requestAnimationFrame(animationLoop);
 }
 
@@ -49,22 +60,37 @@ function starsDrawUpdate(a){
     star(a[i]);
     updateData(a[i]);
   }
+
 }
 
+// function spaceshipDrawUpdate(a){
+//   for(var i=0; i<a.length; i++){
+//     spaceship(a[i]);
+//     updateData(a[i]);
+//   }
+// }
+
 function createData(num) {
+  var allMovingShapes = [];
   for(var i=0; i<num; i++) {
-    allStars.push({
+      allMovingShapes.push({
       "x": w/num*i,
       "y": 0,
       "dx": randn(2),
       "dy": 0.5+rand(2),
+      "sx": 200,
+      "sy":200,
       "c": 200+rand(60),
       "a": 0.5,
+      "l": 15,
+      "d": 2,
+      // "r": 10,
       "spikes": 5,
-      "outerRadius": 25,
+      "outerRadius": 30,
       "innerRadius": 12
     })
   }
+  return allMovingShapes;
 }
 
 function updateData(o) {
@@ -74,36 +100,137 @@ function updateData(o) {
   tyroidal(o);
 }
 
+function spaceship(o) {
+  var x = o.x;
+  var y = o.y;
+
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  // (x,y) starts at tip of nose cone
+  // first draw bottom half of ship
+  ctx.lineTo(x-25, y+10);
+  ctx.lineTo(x-90, y+25);
+  ctx.lineTo(x-120, y+50);
+  ctx.lineTo(x-150, y+55);
+  ctx.lineTo(x-150, y+25);
+  ctx.lineTo(x-160, y+25);
+  ctx.lineTo(x-160, y);
+  //top half of ship
+  ctx.lineTo(x-160, y-25);
+  ctx.lineTo(x-150, y-25);
+  ctx.lineTo(x-150, y-55);
+  ctx.lineTo(x-120, y-50);
+  ctx.lineTo(x-90, y-25);
+  ctx.lineTo(x-25, y-10);
+  ctx.lineTo(x,y);
+  ctx.fillStyle = "hsla("+o.c+",100%, 50%, "+o.a+")";
+  ctx.fill();
+
+  o.x = x;
+  o.y = y;
+}
+
 function star(o) {
+  console.log("stars are being drawn");
+
+  ///////////DRAWS STARS ANOTHER WAY
+  console.log("stars are being drawn");
   var rot = Math.PI / 2 * 3;
-  var x = o.dx;
-  var y = o.dy;
+  var x = o.sx;
+  var y = o.sy;
   var step = Math.PI / o.spikes;
 
   ctx.strokeSyle = "#000";
   ctx.beginPath();
-  ctx.moveTo(o.dx, o.dy - o.outerRadius)
+  ctx.moveTo(o.sx, o.sy - o.outerRadius)
   for (i = 0; i < o.spikes; i++) {
-      x = o.dx + Math.cos(rot) * o.outerRadius;
-      y = o.dy + Math.sin(rot) * o.outerRadius;
+      x = o.sx + Math.cos(rot) * o.outerRadius;
+      y = o.sy + Math.sin(rot) * o.outerRadius;
       ctx.lineTo(x, y)
       rot += step
 
-      x = o.dx + Math.cos(rot) * o.innerRadius;
-      y = o.dy + Math.sin(rot) * o.innerRadius;
+      x = o.sx + Math.cos(rot) * o.innerRadius;
+      y = o.sy + Math.sin(rot) * o.innerRadius;
       ctx.lineTo(x, y)
       rot += step
   }
-  ctx.lineTo(o.dx, o.dy - o.outerRadius)
+  ctx.lineTo(o.sx, o.sy - o.outerRadius)
   ctx.closePath();
   ctx.fillStyle='black';
   ctx.fill();
 
-//DRAWS CIRCLES
+//DRAWS SPACESHIPS
+  // var x = o.x;
+  // var y = o.y;
+  //
   // ctx.beginPath();
-  // ctx.arc(o.x,o.y,o.r,0, 2*Math.PI);
+  // ctx.moveTo(x, y);
+  // // (x,y) starts at tip of nose cone
+  // // first draw bottom half of ship
+  // ctx.lineTo(x-25, y+10);
+  // ctx.lineTo(x-90, y+25);
+  // ctx.lineTo(x-120, y+50);
+  // ctx.lineTo(x-150, y+55);
+  // ctx.lineTo(x-150, y+25);
+  // ctx.lineTo(x-160, y+25);
+  // ctx.lineTo(x-160, y);
+  // //top half of ship
+  // ctx.lineTo(x-160, y-25);
+  // ctx.lineTo(x-150, y-25);
+  // ctx.lineTo(x-150, y-55);
+  // ctx.lineTo(x-120, y-50);
+  // ctx.lineTo(x-90, y-25);
+  // ctx.lineTo(x-25, y-10);
+  // ctx.lineTo(x,y);
   // ctx.fillStyle = "hsla("+o.c+",100%, 50%, "+o.a+")";
   // ctx.fill();
+  //
+  // o.x = x;
+  // o.y = y;
+
+////////DRAWS STARS MY WAY
+// var x = o.dx;
+// var y = o.dy;
+//
+//
+// ctx.beginPath();
+// //ctx.fillStyle = "black";
+// ctx.moveTo(x,y);
+// forward(o2, 15); // updates x,y coordinates, acting as our updateData function from previous modules
+// ctx.lineTo(x,y);
+// turn(o2, 36);
+// forward(o2, 15);
+// ctx.lineTo(x, y);
+// turn(o2, 252);
+// forward(o2, 15);
+// ctx.lineTo(x, y);
+// turn(o2, 36);
+// forward(o2, 15);
+// ctx.lineTo(x, y);
+// turn(o2, 252);
+// forward(o2, 15);
+// ctx.lineTo(x, y);
+// turn(o2, 36);
+// forward(o2, 15);
+// ctx.lineTo(x, y);
+// turn(o2, 252);
+// forward(o2, 15);
+// ctx.lineTo(x, y);
+// turn(o2, 36);
+// forward(o2, 15);
+// ctx.lineTo(x, y);
+// turn(o2, 252);
+// forward(o2, 15);
+// ctx.lineTo(x, y);
+// turn(o2, 36);
+// forward(o2, 15);
+// ctx.lineTo(x, y);
+// ctx.fillStyle = "hsla("+o.c+",100%, 50%, "+o.a+")";
+// ctx.fill();
+//
+// o.dx = x;
+// o.dy = y;
+
 }
 
 function movePlayer(event){
@@ -139,7 +266,7 @@ function turn(o,angle) { // pass object, angle
   if(angle != undefined){ //if angle is undefined
     o.angle += angle;
   }else {
-    o.angle += o.changle;
+    o.angle += o.changle; // else if angle is defined, it will equal a in angle(o1,a)
   }
 }
 
@@ -180,14 +307,6 @@ function bounce(o) {
 function player1(o) {
   var x = o.x;
   var y = o.y;
-  var a = o.angle;
-  var d = o.d;
-
-  // turn(o, 180); // makes it so that we rotate from the center
-  // forward(o, o.x);
-  // turn(o, 90);
-  // forward(o, o.y);
-  // turn(o, 90);
 
   ctx.fillStyle = "black";
   ctx.beginPath();
@@ -213,8 +332,6 @@ function player1(o) {
 
   o.x = x;
   o.y = y;
-  o.d = d;
-  o.angle = a;
 }
 
 function circle(x,y,r){ //planets
